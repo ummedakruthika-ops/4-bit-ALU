@@ -1,0 +1,78 @@
+module alu_4bit(
+    input  [3:0] A,
+    input  [3:0] B,
+    input  [2:0] S,
+    output reg [3:0] Result,
+    output reg Carry,
+    output Zero,
+    output Sign,
+    output reg Overflow
+);
+
+reg [4:0] temp;
+
+always @(*) begin
+    Carry = 0;
+    Overflow = 0;
+
+    case(S)
+
+        // A + B
+        3'b000: begin
+            temp = A + B;
+            Result = temp[3:0];
+            Carry = temp[4];
+            Overflow = (A[3] & B[3] & ~Result[3]) | (~A[3] & ~B[3] & Result[3]);
+        end
+
+        // A - B
+        3'b001: begin
+            temp = A - B;
+            Result = temp[3:0];
+            Carry = temp[4];
+            Overflow = (A[3] & ~B[3] & ~Result[3]) | (~A[3] & B[3] & Result[3]);
+        end
+
+        // AND
+        3'b010: begin
+            Result = A & B;
+        end
+
+        // OR
+        3'b011: begin
+            Result = A | B;
+        end
+
+        // XOR
+        3'b100: begin
+            Result = A ^ B;
+        end
+
+        // NOT A
+        3'b101: begin
+            Result = ~A;
+        end
+
+        // Increment A
+        3'b110: begin
+            temp = A + 1;
+            Result = temp[3:0];
+            Carry = temp[4];
+        end
+
+        // Decrement A
+        3'b111: begin
+            temp = A - 1;
+            Result = temp[3:0];
+        end
+
+        default: Result = 4'b0000;
+
+    endcase
+end
+
+// Flags
+assign Zero = (Result == 4'b0000);
+assign Sign = Result[3];
+
+endmodule
